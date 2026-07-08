@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lenteland Kerstpakket — Sales dashboard</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/msal-browser/3.7.1/msal-browser.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@3.7.1/lib/msal-browser.min.js"
+  onerror="var s=document.createElement('script');s.src='https://alcdn.msauth.net/browser/3.7.1/js/msal-browser.min.js';document.head.appendChild(s)"></script>
 <style>
 :root{--groen:#2d6a4f;--groenl:#40916c;--zacht:#95d5b2;--geel:#e9c46a;--oranje:#f4a261;--rood:#e76f51;--blauw:#457b9d;--bg:#f6f8f5;--tekst:#1b3a2d;--grijs:#6b7a72}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -252,6 +253,7 @@ let msalApp=null;
 async function graphLaden(){
   try{
     if(GRAPH_CONFIG.tenantId.startsWith('VUL-IN')){alert('Graph is nog niet geconfigureerd: vul GRAPH_CONFIG in (zie stappenplan).');return;}
+    if(typeof msal==='undefined'){alert('De Microsoft-inlogbibliotheek is nog niet geladen. Ververs de pagina (Cmd+R) en probeer opnieuw.');return;}
     msalApp = msalApp || new msal.PublicClientApplication({
       auth:{clientId:GRAPH_CONFIG.clientId, authority:'https://login.microsoftonline.com/'+GRAPH_CONFIG.tenantId, redirectUri:window.location.origin+window.location.pathname},
       cache:{cacheLocation:'sessionStorage'}});
