@@ -249,7 +249,7 @@ const GRAPH_CONFIG = {
   clientId: '49d1a932-7abc-47b3-a8be-6b09f6610290',  // app-registratie Lenteland Sales Dashboard
   siteHost: 'lenteland-my.sharepoint.com',
   sitePath: '/personal/bart_lente_land',   // persoonlijke omgeving van Bart, waar de lijst staat
-  listName: 'Prospects Kerstpakket Lenteland'
+  listName: 'sales lijst kerstpakket - nieuw'
 };
 let msalApp=null;
 async function graphLaden(){
@@ -268,9 +268,13 @@ async function graphLaden(){
     const g=async url=>{const r=await fetch('https://graph.microsoft.com/v1.0'+url,{headers:{Authorization:'Bearer '+token}});
       if(!r.ok)throw new Error(url+' → '+r.status);return r.json();};
     const site=await g(`/sites/${GRAPH_CONFIG.siteHost}:${GRAPH_CONFIG.sitePath}`);
-    const lijsten=await g(`/sites/${site.id}/lists?$filter=displayName eq '${GRAPH_CONFIG.listName.replace(/'/g,"''")}'`);
-    if(!lijsten.value.length)throw new Error('Lijst niet gevonden: '+GRAPH_CONFIG.listName);
-    const listId=lijsten.value[0].id;
+    const alleLijsten=await g(`/sites/${site.id}/lists?$select=id,displayName&$top=100`);
+    const norm=s=>String(s||'').toLowerCase().replace(/\s+/g,' ').trim();
+    const doel=norm(GRAPH_CONFIG.listName);
+    let lijst=alleLijsten.value.find(l=>norm(l.displayName)===doel)
+           || alleLijsten.value.find(l=>norm(l.displayName).includes('prospect'));
+    if(!lijst)throw new Error('Lijst niet gevonden. Beschikbare lijsten op deze site: '+alleLijsten.value.map(l=>l.displayName).join(' · '));
+    const listId=lijst.id;
     // kolommen: interne naam (field_1 …) → weergavenaam
     const cols=await g(`/sites/${site.id}/lists/${listId}/columns`);
     const naam={}; cols.value.forEach(c=>naam[c.name]=c.displayName.toLowerCase());
